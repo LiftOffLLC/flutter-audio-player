@@ -13,6 +13,7 @@ class MiniPlayer extends StatefulWidget {
   final Map<String, dynamic> iconStyle;
   final Color backgroundColor;
   final Map<PlayerIcons, dynamic> customizedIcons;
+  final MethodChannelFlutterAudioPlayerPlugin audioPlayer;
 
   const MiniPlayer({
     super.key,
@@ -20,6 +21,7 @@ class MiniPlayer extends StatefulWidget {
     this.iconStyle = const {},
     this.backgroundColor = Colors.black12,
     this.customizedIcons = const {},
+    required this.audioPlayer,
   });
 
   @override
@@ -27,9 +29,6 @@ class MiniPlayer extends StatefulWidget {
 }
 
 class _MiniPlayerState extends State<MiniPlayer> {
-  final MethodChannelFlutterAudioPlayerPlugin _audioPlayer =
-      MethodChannelFlutterAudioPlayerPlugin();
-
   bool _isPlaying = false;
   // ignore: unused_field
   String _status = '';
@@ -42,6 +41,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
   String get audioTitle => widget.audioInfo.title ?? '';
   String get audioArtist => widget.audioInfo.artist ?? '';
   String get audioUrl => widget.audioInfo.audioUrl ?? '';
+  MethodChannelFlutterAudioPlayerPlugin get _audioPlayer => widget.audioPlayer;
 
   @override
   void initState() {

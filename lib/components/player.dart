@@ -10,12 +10,14 @@ class Player extends StatefulWidget {
   final AudioInfo audioInfo;
   final Map<String, dynamic> iconStyle;
   final Map<PlayerIcons, dynamic> customizedIcons;
+  final MethodChannelFlutterAudioPlayerPlugin audioPlayer;
 
   const Player({
     super.key,
     required this.audioInfo,
     this.iconStyle = const {},
     this.customizedIcons = const {},
+    required this.audioPlayer,
   });
 
   @override
@@ -23,8 +25,6 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
-  final MethodChannelFlutterAudioPlayerPlugin _audioPlayer =
-      MethodChannelFlutterAudioPlayerPlugin();
   bool _isPlaying = false;
   int _currentPosition = 0;
   int _totalDuration = 0;
@@ -34,13 +34,14 @@ class _PlayerState extends State<Player> {
   StreamSubscription? _positionSubscription;
   StreamSubscription? _completionSubscription;
   StreamSubscription? _errorSubscription;
-  // StreamSubscription? _nextTrackSubscription;
-  // StreamSubscription? _previousTrackSubscription;
+  StreamSubscription? _nextTrackSubscription;
+  StreamSubscription? _previousTrackSubscription;
 
   String get audioUrl => widget.audioInfo.audioUrl ?? '';
   String get audioTitle => widget.audioInfo.title ?? '';
   String get audioPicture => widget.audioInfo.picture ?? '';
   String get audioArtist => widget.audioInfo.artist ?? '';
+  MethodChannelFlutterAudioPlayerPlugin get _audioPlayer => widget.audioPlayer;
 
   @override
   void initState() {
@@ -126,8 +127,8 @@ class _PlayerState extends State<Player> {
     _positionSubscription?.cancel();
     _completionSubscription?.cancel();
     _errorSubscription?.cancel();
-    // _nextTrackSubscription?.cancel();
-    // _previousTrackSubscription?.cancel();
+    _nextTrackSubscription?.cancel();
+    _previousTrackSubscription?.cancel();
     super.dispose();
   }
 

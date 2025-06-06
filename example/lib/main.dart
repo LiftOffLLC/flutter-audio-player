@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_audio_player_plugin/components/mini_player.dart';
 import 'package:flutter_audio_player_plugin/components/player.dart';
-import 'package:flutter_audio_player_plugin/components/player_controls.dart';
+import 'package:flutter_audio_player_plugin/flutter_audio_player_plugin_method_channel.dart';
 import 'package:flutter_audio_player_plugin/models/audio_info.dart';
 
 void main() {
@@ -17,6 +17,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final MethodChannelFlutterAudioPlayerPlugin audioPlayer =
+      MethodChannelFlutterAudioPlayerPlugin();
   bool _isCustomizePlayerIcons = false;
   bool _isCustomizeIconStyle = false;
 
@@ -86,6 +88,7 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           children: [
             Player(
+              audioPlayer: audioPlayer,
               audioInfo: audioInfo,
               customizedIcons: customizedPlayerIcons,
               iconStyle: customizedIconStyle,
@@ -104,6 +107,7 @@ class _MyAppState extends State<MyApp> {
               iconStyle: customizedIconStyle,
               customizedIcons: customizedPlayerIcons,
               backgroundColor: Colors.grey,
+              audioPlayer: audioPlayer,
             ),
             const SizedBox(height: 8),
           ],

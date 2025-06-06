@@ -20,3 +20,12 @@ enum PlayerStatus {
   error,
   completed,
 }
+
+enum PlayerIcons {
+  playIcon,
+  pauseIcon,
+  skipPreviousIcon,
+  skipNextIcon,
+  replay10Icon,
+  forward10,
+}

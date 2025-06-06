@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum PlayerIcons {
-  playIcon,
-  pauseIcon,
-  skipPreviousIcon,
-  skipNextIcon,
-  replay10Icon,
-  forward10,
-}
+import '../models/audio_info.dart';
 
 class PlayerControls extends StatefulWidget {
   final void Function() handlePlayPauseAudio;
