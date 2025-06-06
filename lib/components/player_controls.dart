@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 
+enum PlayerIcons {
+  playIcon,
+  pauseIcon,
+  skipPreviousIcon,
+  skipNextIcon,
+  replay10Icon,
+  forward10,
+}
+
 class PlayerControls extends StatefulWidget {
   final void Function() handlePlayPauseAudio;
   final void Function() handleStopAudio;
@@ -9,6 +18,7 @@ class PlayerControls extends StatefulWidget {
   final void Function() handlePlayPreviousAudio;
   final bool isPlaying;
   final Map<String, dynamic> iconStyle;
+  final Map<PlayerIcons, dynamic> customizedIcons;
   final bool isMinPlayer;
 
   const PlayerControls({
@@ -21,6 +31,7 @@ class PlayerControls extends StatefulWidget {
     required this.handlePlayPreviousAudio,
     required this.isPlaying,
     this.iconStyle = const {},
+    this.customizedIcons = const {},
     this.isMinPlayer = false,
   });
 
@@ -29,6 +40,21 @@ class PlayerControls extends StatefulWidget {
 }
 
 class _PlayerControlsState extends State<PlayerControls> {
+  get playIcon =>
+      widget.customizedIcons[PlayerIcons.playIcon] ?? Icons.play_circle_filled;
+  get pauseIcon =>
+      widget.customizedIcons[PlayerIcons.pauseIcon] ??
+      Icons.pause_circle_filled;
+  get skipPreviousIcon =>
+      widget.customizedIcons[PlayerIcons.skipPreviousIcon] ??
+      Icons.skip_previous;
+  get skipNextIcon =>
+      widget.customizedIcons[PlayerIcons.skipNextIcon] ?? Icons.skip_next;
+  get replay10Icon =>
+      widget.customizedIcons[PlayerIcons.replay10Icon] ?? Icons.replay_10;
+  get forward10Icon =>
+      widget.customizedIcons[PlayerIcons.forward10] ?? Icons.forward_10;
+
   void handleSeekBackward() {
     // Handle rewind 10 seconds
     widget.handleSeekBackward();
@@ -62,7 +88,7 @@ class _PlayerControlsState extends State<PlayerControls> {
           : MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: const Icon(Icons.skip_previous),
+          icon: Icon(skipPreviousIcon),
           iconSize: widget.iconStyle['iconSize'] ?? 45,
           color: widget.iconStyle['color'] ?? Colors.indigo,
           onPressed: handlePlayPreviousAudio,
@@ -70,15 +96,13 @@ class _PlayerControlsState extends State<PlayerControls> {
         widget.isMinPlayer
             ? Container()
             : IconButton(
-                icon: const Icon(Icons.replay_10),
+                icon: Icon(replay10Icon),
                 iconSize: widget.iconStyle['iconSize'] ?? 45,
                 color: widget.iconStyle['color'] ?? Colors.indigo,
                 onPressed: handleSeekBackward,
               ),
         IconButton(
-          icon: widget.isPlaying
-              ? const Icon(Icons.pause_circle_filled)
-              : const Icon(Icons.play_circle_filled),
+          icon: widget.isPlaying ? Icon(pauseIcon) : Icon(playIcon),
           iconSize: widget.iconStyle['iconSize'] ?? 45,
           color: widget.iconStyle['color'] ?? Colors.indigo,
           onPressed: handlePlayPause,
@@ -86,13 +110,13 @@ class _PlayerControlsState extends State<PlayerControls> {
         widget.isMinPlayer
             ? Container()
             : IconButton(
-                icon: const Icon(Icons.forward_10),
+                icon: Icon(forward10Icon),
                 iconSize: widget.iconStyle['iconSize'] ?? 45,
                 color: widget.iconStyle['color'] ?? Colors.indigo,
                 onPressed: handleSeekForward,
               ),
         IconButton(
-          icon: const Icon(Icons.skip_next),
+          icon: Icon(skipNextIcon),
           iconSize: widget.iconStyle['iconSize'] ?? 45,
           color: widget.iconStyle['color'] ?? Colors.indigo,
           onPressed: handlePlayNextAudio,

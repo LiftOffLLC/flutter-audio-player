@@ -11,3 +11,12 @@ class AudioInfo {
     this.picture,
   });
 }
+
+enum PlayerStatus {
+  loading,
+  playing,
+  paused,
+  stopped,
+  error,
+  completed,
+}

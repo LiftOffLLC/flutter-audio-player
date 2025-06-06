@@ -11,7 +11,7 @@ class AudioImage extends StatelessWidget {
     super.key,
     required this.audioPicture,
     this.width = 700,
-    this.height = 300,
+    this.height = 200,
     this.alignment = Alignment.center,
     this.fit = BoxFit.contain,
   });

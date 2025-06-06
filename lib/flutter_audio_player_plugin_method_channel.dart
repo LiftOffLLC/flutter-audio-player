@@ -29,13 +29,11 @@ class MethodChannelFlutterAudioPlayerPlugin
   }
 
   Future<void> _handleNativeMethodCall(MethodCall call) async {
-    print('handleNativeMethodCall: =====>>>>>  ${call.method}');
     switch (call.method) {
       case 'onPositionChanged':
         _positionController.add(call.arguments as int);
         break;
       case 'onPlaybackComplete':
-        print('onPlaybackComplete: dart =====>>>>>');
         _completionController.add(null);
         break;
       case 'onError':
@@ -61,7 +59,6 @@ class MethodChannelFlutterAudioPlayerPlugin
 
   @override
   Future<void> setFilePath(String filePath) async {
-    print('setFilePath: =====>>>>>  $filePath');
     await methodChannel
         .invokeMethod<void>('setFilePath', {"filePath": filePath});
   }
@@ -80,7 +77,6 @@ class MethodChannelFlutterAudioPlayerPlugin
 
   @override
   Future<void> play(String url) async {
-    print('play: =====>>>>>  $url');
     await methodChannel.invokeMethod('play', {"url": url});
   }
 

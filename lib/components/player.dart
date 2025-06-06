@@ -1,27 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_player_plugin/flutter_audio_player_plugin.dart';
 import 'package:flutter_audio_player_plugin/flutter_audio_player_plugin_method_channel.dart';
 import 'player_controls.dart';
 import '../widgets/app_text.dart';
 import '../widgets/audio_image.dart';
 import '../models/audio_info.dart';
 
-enum PlayerStatus {
-  loading,
-  playing,
-  paused,
-  stopped,
-  error,
-  completed,
-}
-
 class Player extends StatefulWidget {
   final AudioInfo audioInfo;
+  final Map<String, dynamic> iconStyle;
+  final Map<PlayerIcons, dynamic> customizedIcons;
 
   const Player({
     super.key,
     required this.audioInfo,
+    this.iconStyle = const {},
+    this.customizedIcons = const {},
   });
 
   @override
@@ -40,8 +34,8 @@ class _PlayerState extends State<Player> {
   StreamSubscription? _positionSubscription;
   StreamSubscription? _completionSubscription;
   StreamSubscription? _errorSubscription;
-  StreamSubscription? _nextTrackSubscription;
-  StreamSubscription? _previousTrackSubscription;
+  // StreamSubscription? _nextTrackSubscription;
+  // StreamSubscription? _previousTrackSubscription;
 
   String get audioUrl => widget.audioInfo.audioUrl ?? '';
   String get audioTitle => widget.audioInfo.title ?? '';
@@ -62,7 +56,6 @@ class _PlayerState extends State<Player> {
     setState(() {
       _totalDuration = totalDuration;
     });
-    print('Total duration: $totalDuration');
   }
 
   void _setupListeners() {
@@ -75,7 +68,6 @@ class _PlayerState extends State<Player> {
     });
 
     _completionSubscription = _audioPlayer.completionStream.listen((_) {
-      print('Completion:');
       setState(() {
         _isPlaying = false;
         _currentPosition = 0;
@@ -134,8 +126,8 @@ class _PlayerState extends State<Player> {
     _positionSubscription?.cancel();
     _completionSubscription?.cancel();
     _errorSubscription?.cancel();
-    _nextTrackSubscription?.cancel();
-    _previousTrackSubscription?.cancel();
+    // _nextTrackSubscription?.cancel();
+    // _previousTrackSubscription?.cancel();
     super.dispose();
   }
 
@@ -301,6 +293,9 @@ class _PlayerState extends State<Player> {
           handlePlayNextAudio: handlePlayNextAudio,
           handlePlayPreviousAudio: handlePlayPreviousAudio,
           isPlaying: _isPlaying,
+          iconStyle: widget.iconStyle,
+          isMinPlayer: false,
+          customizedIcons: widget.customizedIcons,
         ),
       ],
     );

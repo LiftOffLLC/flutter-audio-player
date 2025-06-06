@@ -21,8 +21,6 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
-    case "getPlatformVersion":
-        result("iOS " + UIDevice.current.systemVersion)
     case "setFilePath":
         guard let args = call.arguments as? [String: Any],
               let filePath = args["filePath"] as? String else {
@@ -31,11 +29,9 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
                               details: nil))
             return
         }
-        print("Setting file path: \(filePath)")
         setFilePath(filePath: filePath, result: result)
     case "loadAudio":
         logPlayerState()
-        print("loadAudio: =====>>>>>  \(call.arguments)");
         guard let args = call.arguments as? [String: Any],
               let url = args["url"] as? String,
               let title = args["title"] as? String,
@@ -354,12 +350,6 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
           print("Failed to set up audio session: \(error)")
       }
   }
-
-//   @objc func playerDidFinishPlaying(note: NSNotification) {
-//     print("playerDidFinishPlaying: =====>>>>>")
-//     print("Channel is: \(String(describing: self.channel))")
-//     self.channel?.invokeMethod("onPlaybackComplete", arguments: nil)
-//   }
 
     @objc func playerDidFinishPlaying(note: NSNotification) {
         logPlayerState()
