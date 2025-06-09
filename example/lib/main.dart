@@ -4,6 +4,7 @@ import 'package:flutter_audio_player_plugin/components/mini_player.dart';
 import 'package:flutter_audio_player_plugin/components/player.dart';
 import 'package:flutter_audio_player_plugin/flutter_audio_player_plugin_method_channel.dart';
 import 'package:flutter_audio_player_plugin/models/audio_info.dart';
+import 'package:flutter_audio_player_plugin_example/customized_player.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,6 +22,14 @@ class _MyAppState extends State<MyApp> {
       MethodChannelFlutterAudioPlayerPlugin();
   bool _isCustomizePlayerIcons = false;
   bool _isCustomizeIconStyle = false;
+
+  final audioInfo = AudioInfo(
+    title: 'Audio Title',
+    artist: 'Audio Artist',
+    audioUrl: 'https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp4',
+    picture:
+        'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  );
 
   Map<String, dynamic> get customizedIconStyle => _isCustomizeIconStyle
       ? const {
@@ -70,16 +79,17 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  Widget _buildCustomizedPlayer() {
+    return CustomizedPlayer(
+      audioPlayer: audioPlayer,
+      audioInfo: audioInfo,
+      customizedIcons: customizedPlayerIcons,
+      iconStyle: customizedIconStyle,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final audioInfo = AudioInfo(
-      title: 'Audio Title',
-      artist: 'Audio Artist',
-      audioUrl: 'https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp4',
-      picture:
-          'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    );
-
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -97,6 +107,8 @@ class _MyAppState extends State<MyApp> {
             _buildButton('Customize Player Icons', customizePlayerIcons),
             _buildButton('Customize icon style', customizeIconStyle),
             _buildButton('Reset all', resetAll),
+            const SizedBox(height: 16),
+            _buildCustomizedPlayer(),
           ],
         ),
         bottomNavigationBar: Column(
