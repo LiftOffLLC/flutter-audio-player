@@ -11,6 +11,12 @@ class Player extends StatefulWidget {
   final Map<String, dynamic> iconStyle;
   final Map<PlayerIcons, dynamic> customizedIcons;
   final MethodChannelFlutterAudioPlayerPlugin audioPlayer;
+  final Function(int)? onPlay;
+  final Function(int)? onPause;
+  final Function(int)? onStop;
+  final Function(int)? onPlayNext;
+  final Function(int)? onPlayPrevious;
+  final Function(int)? onPositionChanged;
 
   const Player({
     super.key,
@@ -18,6 +24,12 @@ class Player extends StatefulWidget {
     this.iconStyle = const {},
     this.customizedIcons = const {},
     required this.audioPlayer,
+    this.onPlay,
+    this.onPause,
+    this.onStop,
+    this.onPlayNext,
+    this.onPlayPrevious,
+    this.onPositionChanged,
   });
 
   @override
@@ -51,6 +63,32 @@ class _PlayerState extends State<Player> {
     _loadAudio();
   }
 
+  @override
+  void didUpdateWidget(Player oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.audioInfo.audioUrl != widget.audioInfo.audioUrl) {}
+  }
+
+  @override
+  void dispose() {
+    _positionSubscription?.cancel();
+    _completionSubscription?.cancel();
+    _errorSubscription?.cancel();
+    _nextTrackSubscription?.cancel();
+    _previousTrackSubscription?.cancel();
+    super.dispose();
+  }
+
+  // void _playNextTrack() {
+  //   // Implement next track logic
+  //   print('Next track requested from notification');
+  // }
+
+  // void _playPreviousTrack() {
+  //   // Implement previous track logic
+  //   print('Previous track requested from notification');
+  // }
+
   void _setFilePath() async {
     await _audioPlayer.setFilePath(audioUrl);
     final totalDuration = await _audioPlayer.getDuration();
@@ -66,6 +104,7 @@ class _PlayerState extends State<Player> {
           _currentPosition = position;
         });
       }
+      widget.onPositionChanged?.call(position);
     });
 
     _completionSubscription = _audioPlayer.completionStream.listen((_) {
@@ -93,16 +132,6 @@ class _PlayerState extends State<Player> {
     // });
   }
 
-  // void _playNextTrack() {
-  //   // Implement next track logic
-  //   print('Next track requested from notification');
-  // }
-
-  // void _playPreviousTrack() {
-  //   // Implement previous track logic
-  //   print('Previous track requested from notification');
-  // }
-
   Future<void> _loadAudio() async {
     try {
       if (audioUrl.isEmpty) {
@@ -120,16 +149,6 @@ class _PlayerState extends State<Player> {
         );
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _positionSubscription?.cancel();
-    _completionSubscription?.cancel();
-    _errorSubscription?.cancel();
-    _nextTrackSubscription?.cancel();
-    _previousTrackSubscription?.cancel();
-    super.dispose();
   }
 
   String _formatDuration(int milliseconds) {
@@ -151,11 +170,13 @@ class _PlayerState extends State<Player> {
   void handlePlayAudio() {
     // Handle play audio
     _audioPlayer.play(audioUrl);
+    widget.onPlay?.call(_currentPosition);
   }
 
   void handlePauseAudio() async {
     // Handle pause audio
     await _audioPlayer.pause();
+    widget.onPause?.call(_currentPosition);
   }
 
   void handlePlayPauseAudio() async {
@@ -181,6 +202,7 @@ class _PlayerState extends State<Player> {
         _currentPosition = 0;
         _status = PlayerStatus.stopped.name;
       });
+      widget.onStop?.call(_currentPosition);
     }
   }
 
@@ -199,11 +221,13 @@ class _PlayerState extends State<Player> {
   void handlePlayNextAudio() async {
     // Handle play next audio
     // await _audioPlayer.play(audioUrl);
+    // widget.onPlayNext?.call(_currentPosition);
   }
 
   void handlePlayPreviousAudio() async {
     // Handle play previous audio
     // await _audioPlayer.play(audioUrl);
+    // widget.onPlayPrevious?.call(_currentPosition);
   }
 
   void onSliderChanged(double value) {
