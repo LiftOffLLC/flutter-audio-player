@@ -24,6 +24,36 @@ abstract class FlutterAudioPlayerPluginPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// Stream of player status updates
+  Stream<String> get statusStream {
+    throw UnimplementedError('statusStream has not been implemented.');
+  }
+
+  /// Stream of position updates
+  Stream<int> get positionStream {
+    throw UnimplementedError('positionStream has not been implemented.');
+  }
+
+  /// Stream of playback completion events
+  Stream<void> get completionStream {
+    throw UnimplementedError('completionStream has not been implemented.');
+  }
+
+  /// Stream of error events
+  Stream<String> get errorStream {
+    throw UnimplementedError('errorStream has not been implemented.');
+  }
+
+  /// Stream of next track events
+  Stream<void> get nextTrackStream {
+    throw UnimplementedError('nextTrackStream has not been implemented.');
+  }
+
+  /// Stream of previous track events
+  Stream<void> get previousTrackStream {
+    throw UnimplementedError('previousTrackStream has not been implemented.');
+  }
+
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
@@ -42,6 +72,10 @@ abstract class FlutterAudioPlayerPluginPlatform extends PlatformInterface {
 
   Future<void> pause() {
     throw UnimplementedError('pause() has not been implemented.');
+  }
+
+  Future<void> resume() {
+    throw UnimplementedError('resume() has not been implemented.');
   }
 
   Future<void> stop() {

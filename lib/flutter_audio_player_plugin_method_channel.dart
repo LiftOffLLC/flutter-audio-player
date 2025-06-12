@@ -17,12 +17,25 @@ class MethodChannelFlutterAudioPlayerPlugin
   final _errorController = StreamController<String>.broadcast();
   final _nextTrackController = StreamController<void>.broadcast();
   final _previousTrackController = StreamController<void>.broadcast();
+  final _statusController = StreamController<String>.broadcast();
 
+  @override
   Stream<int> get positionStream => _positionController.stream;
+
+  @override
   Stream<void> get completionStream => _completionController.stream;
+
+  @override
   Stream<String> get errorStream => _errorController.stream;
+
+  @override
   Stream<void> get nextTrackStream => _nextTrackController.stream;
+
+  @override
   Stream<void> get previousTrackStream => _previousTrackController.stream;
+
+  @override
+  Stream<String> get statusStream => _statusController.stream;
 
   MethodChannelFlutterAudioPlayerPlugin() {
     methodChannel.setMethodCallHandler(_handleNativeMethodCall);
@@ -44,6 +57,9 @@ class MethodChannelFlutterAudioPlayerPlugin
         break;
       case 'onPreviousTrack':
         _previousTrackController.add(null);
+        break;
+      case 'onStatusChanged':
+        _statusController.add(call.arguments as String);
         break;
       default:
         throw MissingPluginException('Not implemented: ${call.method}');
@@ -83,6 +99,11 @@ class MethodChannelFlutterAudioPlayerPlugin
   @override
   Future<void> pause() async {
     await methodChannel.invokeMethod('pause');
+  }
+
+  @override
+  Future<void> resume() async {
+    await methodChannel.invokeMethod('resume');
   }
 
   @override

@@ -19,6 +19,8 @@ enum PlayerStatus {
   stopped,
   error,
   completed,
+  idle,
+  ready,
 }
 
 enum PlayerIcons {

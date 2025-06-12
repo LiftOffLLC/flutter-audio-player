@@ -9,6 +9,8 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
   private var timeObserverToken: Any?
   private var channel: FlutterMethodChannel?
   private var nowPlayingInfo: [String: Any] = [:]
+  private var statusObserver: NSKeyValueObservation?
+  private var status: String = "idle"
 
   public static func register(with registrar: FlutterPluginRegistrar) {
       let channel = FlutterMethodChannel(name: "flutter_audio_player_plugin", binaryMessenger: registrar.messenger())
@@ -67,6 +69,7 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
             }
             
             updateNowPlayingInfo(title: title, artist: artist)
+            observePlayerStatus(updatedStatus: "ready")
             result(nil)
         } else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid audio URL", details: nil))
@@ -114,6 +117,8 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
 
     private func cleanup() {
         stopPositionTimer()
+        statusObserver?.invalidate()
+        statusObserver = nil
 
         // Remove completion observer
         if let existingItem = playerItem {
@@ -123,7 +128,7 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
         player?.pause()
         player = nil
         playerItem = nil
-        // observedPlayerItem = nil
+        observePlayerStatus(updatedStatus: "stopped")
     }
 
   private func setupRemoteTransportControls() {
@@ -229,10 +234,8 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
   
   private func play(url: URL, result: @escaping FlutterResult) {
     cleanup()
-    //   player = AVPlayer(url: url)
     playerItem = AVPlayerItem(url: url)
     player = AVPlayer(playerItem: playerItem)
-
 
     // Add completion observer
     NotificationCenter.default.addObserver(
@@ -241,6 +244,9 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
         name: .AVPlayerItemDidPlayToEndTime,
         object: playerItem
     )
+
+    // Observe player status
+    observePlayerStatus(updatedStatus: "playing")
 
     player?.play()
     startPositionTimer()
@@ -257,6 +263,7 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
   
   private func pause(result: @escaping FlutterResult) {
       player?.pause()
+      observePlayerStatus(updatedStatus: "paused")
       updateNowPlayingInfo(
           title: nowPlayingInfo[MPMediaItemPropertyTitle] as? String ?? "",
           artist: nowPlayingInfo[MPMediaItemPropertyArtist] as? String ?? ""
@@ -266,6 +273,7 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
   
   private func resume(result: @escaping FlutterResult) {
       player?.play()
+      observePlayerStatus(updatedStatus: "playing")
       updateNowPlayingInfo(
           title: nowPlayingInfo[MPMediaItemPropertyTitle] as? String ?? "",
           artist: nowPlayingInfo[MPMediaItemPropertyArtist] as? String ?? ""
@@ -275,6 +283,7 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
   
   private func stop(result: @escaping FlutterResult) {
       cleanup()
+      observePlayerStatus(updatedStatus: "stopped")
       result(nil)
   }
   
@@ -296,9 +305,11 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
                             details: nil))
           return
       }
-      
+      let newStatus = status == "ready" || status == "stopped" ? "paused" : status
+      observePlayerStatus(updatedStatus: newStatus)
       let timeInSeconds = Double(position)
       player.seek(to: CMTime(seconds: timeInSeconds, preferredTimescale: 600))
+
       result(nil)
   }
   
@@ -362,9 +373,10 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
             
             // Reset position
             self.player?.seek(to: .zero)
-            
+            observePlayerStatus(updatedStatus: "completed")
             // Notify Dart
             self.channel?.invokeMethod("onPlaybackComplete", arguments: nil)
+
             print("onPlaybackComplete invoked on channel")
         }
     }
@@ -381,6 +393,12 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
             print("- Duration: \(playerItem.duration.seconds)")
             print("- Status: \(playerItem.status.rawValue)")
         }
+    }
+
+    private func observePlayerStatus(updatedStatus: String) {
+        statusObserver?.invalidate()
+        status = updatedStatus
+        self.channel?.invokeMethod("onStatusChanged", arguments: updatedStatus)
     }
 
 }

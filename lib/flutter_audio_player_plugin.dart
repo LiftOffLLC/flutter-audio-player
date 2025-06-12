@@ -24,6 +24,10 @@ class FlutterAudioPlayerPlugin {
     return FlutterAudioPlayerPluginPlatform.instance.pause();
   }
 
+  Future<void> resume() {
+    return FlutterAudioPlayerPluginPlatform.instance.resume();
+  }
+
   Future<void> stop() {
     return FlutterAudioPlayerPluginPlatform.instance.stop();
   }

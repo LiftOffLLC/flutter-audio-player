@@ -29,7 +29,7 @@ class _CustomizedPlayerState extends State<CustomizedPlayer> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.cyan,
+      color: Colors.black12,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

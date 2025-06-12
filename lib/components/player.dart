@@ -11,12 +11,17 @@ class Player extends StatefulWidget {
   final Map<String, dynamic> iconStyle;
   final Map<PlayerIcons, dynamic> customizedIcons;
   final MethodChannelFlutterAudioPlayerPlugin audioPlayer;
-  final Function(int)? onPlay;
-  final Function(int)? onPause;
-  final Function(int)? onStop;
-  final Function(int)? onPlayNext;
-  final Function(int)? onPlayPrevious;
+  final Function()? onPlay;
+  final Function()? onPause;
+  final Function()? onResume;
+  final Function()? onStop;
+  final Function()? onPlayNext;
+  final Function()? onPlayPrevious;
   final Function(int)? onPositionChanged;
+  final Function()? onCompletion;
+  final SliderThemeData? sliderStyles;
+  final double? imageWidth;
+  final double? imageHeight;
 
   const Player({
     super.key,
@@ -26,10 +31,15 @@ class Player extends StatefulWidget {
     required this.audioPlayer,
     this.onPlay,
     this.onPause,
+    this.onResume,
     this.onStop,
     this.onPlayNext,
     this.onPlayPrevious,
     this.onPositionChanged,
+    this.onCompletion,
+    this.sliderStyles,
+    this.imageWidth,
+    this.imageHeight,
   });
 
   @override
@@ -41,13 +51,13 @@ class _PlayerState extends State<Player> {
   int _currentPosition = 0;
   int _totalDuration = 0;
   bool _isDragging = false;
-  // ignore: unused_field
-  String _status = '';
+  String _status = PlayerStatus.idle.name;
   StreamSubscription? _positionSubscription;
   StreamSubscription? _completionSubscription;
   StreamSubscription? _errorSubscription;
   StreamSubscription? _nextTrackSubscription;
   StreamSubscription? _previousTrackSubscription;
+  StreamSubscription? _statusSubscription;
 
   String get audioUrl => widget.audioInfo.audioUrl ?? '';
   String get audioTitle => widget.audioInfo.title ?? '';
@@ -76,6 +86,7 @@ class _PlayerState extends State<Player> {
     _errorSubscription?.cancel();
     _nextTrackSubscription?.cancel();
     _previousTrackSubscription?.cancel();
+    _statusSubscription?.cancel();
     super.dispose();
   }
 
@@ -107,12 +118,20 @@ class _PlayerState extends State<Player> {
       widget.onPositionChanged?.call(position);
     });
 
+    _statusSubscription = _audioPlayer.statusStream.listen((status) {
+      setState(() {
+        _status = status;
+        _isPlaying = status == PlayerStatus.playing.name;
+      });
+    });
+
     _completionSubscription = _audioPlayer.completionStream.listen((_) {
       setState(() {
         _isPlaying = false;
         _currentPosition = 0;
         _status = PlayerStatus.completed.name;
       });
+      widget.onCompletion?.call();
     });
 
     _errorSubscription = _audioPlayer.errorStream.listen((error) {
@@ -170,27 +189,28 @@ class _PlayerState extends State<Player> {
   void handlePlayAudio() {
     // Handle play audio
     _audioPlayer.play(audioUrl);
-    widget.onPlay?.call(_currentPosition);
+    widget.onPlay?.call();
   }
 
   void handlePauseAudio() async {
     // Handle pause audio
     await _audioPlayer.pause();
-    widget.onPause?.call(_currentPosition);
+    widget.onPause?.call();
+  }
+
+  void handleResumeAudio() {
+    _audioPlayer.resume();
+    widget.onResume?.call();
   }
 
   void handlePlayPauseAudio() async {
-    if (_isPlaying) {
-      handlePauseAudio();
-    } else {
+    if ([PlayerStatus.completed.name, PlayerStatus.ready.name]
+        .contains(_status)) {
       handlePlayAudio();
-    }
-    if (mounted) {
-      setState(() {
-        _isPlaying = !_isPlaying;
-        _status =
-            _isPlaying ? PlayerStatus.playing.name : PlayerStatus.paused.name;
-      });
+    } else if (_status == PlayerStatus.playing.name) {
+      handlePauseAudio();
+    } else if (_status == PlayerStatus.paused.name) {
+      handleResumeAudio();
     }
   }
 
@@ -202,7 +222,7 @@ class _PlayerState extends State<Player> {
         _currentPosition = 0;
         _status = PlayerStatus.stopped.name;
       });
-      widget.onStop?.call(_currentPosition);
+      widget.onStop?.call();
     }
   }
 
@@ -230,9 +250,10 @@ class _PlayerState extends State<Player> {
     // widget.onPlayPrevious?.call(_currentPosition);
   }
 
-  void onSliderChanged(double value) {
+  void onSliderChanged(double value) async {
+    final position = value.toInt() * 1000;
     setState(() {
-      _currentPosition = value.toInt();
+      _currentPosition = position;
     });
   }
 
@@ -243,19 +264,25 @@ class _PlayerState extends State<Player> {
   }
 
   void onSliderChangeEnd(double value) async {
+    final position = value.toInt();
     setState(() {
       _isDragging = false;
-      _currentPosition = value.toInt();
+      _currentPosition = position;
     });
-
-    await _audioPlayer.seekTo(value.toInt());
+    await _audioPlayer.seekTo(position);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        AudioImage(audioPicture: audioPicture),
+        audioPicture.isNotEmpty
+            ? AudioImage(
+                audioPicture: audioPicture,
+                width: widget.imageWidth ?? 100.0,
+                height: widget.imageHeight ?? 100.0,
+              )
+            : const SizedBox.shrink(),
         const SizedBox(height: 20),
         AppText(
           text: audioTitle,
@@ -275,13 +302,18 @@ class _PlayerState extends State<Player> {
         // Progress slider
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            trackHeight: 4.0,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16.0),
-            activeTrackColor: Colors.indigo,
-            inactiveTrackColor: Colors.indigo.withOpacity(0.2),
-            thumbColor: Colors.indigo,
-            overlayColor: Colors.indigo.withOpacity(0.2),
+            trackHeight: widget.sliderStyles?.trackHeight ?? 4.0,
+            thumbShape: widget.sliderStyles?.thumbShape ??
+                const RoundSliderThumbShape(enabledThumbRadius: 8.0),
+            overlayShape: widget.sliderStyles?.overlayShape ??
+                const RoundSliderOverlayShape(overlayRadius: 16.0),
+            activeTrackColor:
+                widget.sliderStyles?.activeTrackColor ?? Colors.indigo,
+            inactiveTrackColor: widget.sliderStyles?.inactiveTrackColor ??
+                Colors.indigo.withOpacity(0.2),
+            thumbColor: widget.sliderStyles?.thumbColor ?? Colors.indigo,
+            overlayColor: widget.sliderStyles?.overlayColor ??
+                Colors.indigo.withOpacity(0.2),
           ),
           child: Slider(
             value: getCurrentPosition(),

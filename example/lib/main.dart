@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_audio_player_plugin/components/mini_player.dart';
@@ -22,6 +24,7 @@ class _MyAppState extends State<MyApp> {
       MethodChannelFlutterAudioPlayerPlugin();
   bool _isCustomizePlayerIcons = false;
   bool _isCustomizeIconStyle = false;
+  bool _isCustomizeSlider = false;
 
   final audioInfo = AudioInfo(
     title: 'Audio Title',
@@ -31,12 +34,36 @@ class _MyAppState extends State<MyApp> {
         'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   );
 
-  Map<String, dynamic> get customizedIconStyle => _isCustomizeIconStyle
-      ? const {
-          'color': Colors.black54,
-          'size': 16,
-        }
-      : const {};
+  final iconStyles = [
+    {
+      'color': Colors.green,
+      'size': 16,
+    },
+    {
+      'color': Colors.red,
+      'size': 24,
+    },
+    {
+      'color': Colors.blue,
+      'size': 32,
+    },
+    {
+      'color': Colors.yellow,
+      'size': 40,
+    },
+    {
+      'color': Colors.purple,
+      'size': 48,
+    },
+  ];
+
+  Map<String, dynamic> get customizedIconStyle {
+    if (_isCustomizeIconStyle) {
+      // how to randomly pick one from iconStyles
+      return iconStyles[Random().nextInt(iconStyles.length)];
+    }
+    return const {};
+  }
 
   Map<PlayerIcons, dynamic> get customizedPlayerIcons => _isCustomizePlayerIcons
       ? const {
@@ -49,9 +76,20 @@ class _MyAppState extends State<MyApp> {
         }
       : const {};
 
+  SliderThemeData get customizedSliderTheme => _isCustomizeSlider
+      ? const SliderThemeData(
+          trackHeight: 10.0,
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
+          overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
+          activeTrackColor: Colors.tealAccent,
+          inactiveTrackColor: Colors.greenAccent,
+          thumbColor: Colors.limeAccent,
+        )
+      : const SliderThemeData();
+
   void customizePlayerIcons() {
     setState(() {
-      _isCustomizePlayerIcons = true;
+      _isCustomizePlayerIcons = !_isCustomizePlayerIcons;
     });
   }
 
@@ -65,26 +103,39 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _isCustomizePlayerIcons = false;
       _isCustomizeIconStyle = false;
+      _isCustomizeSlider = false;
+    });
+  }
+
+  void customizeSlider() {
+    setState(() {
+      _isCustomizeSlider = true;
     });
   }
 
   Widget _buildButton(String text, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey,
-        foregroundColor: Colors.black,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.black12,
+          foregroundColor: Colors.black,
+        ),
+        child: Text(text, style: const TextStyle(color: Colors.black)),
       ),
-      child: Text(text),
     );
   }
 
   Widget _buildCustomizedPlayer() {
-    return CustomizedPlayer(
-      audioPlayer: audioPlayer,
-      audioInfo: audioInfo,
-      customizedIcons: customizedPlayerIcons,
-      iconStyle: customizedIconStyle,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: CustomizedPlayer(
+        audioPlayer: audioPlayer,
+        audioInfo: audioInfo,
+        customizedIcons: customizedPlayerIcons,
+        iconStyle: customizedIconStyle,
+      ),
     );
   }
 
@@ -96,16 +147,19 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Player(
               audioPlayer: audioPlayer,
               audioInfo: audioInfo,
               customizedIcons: customizedPlayerIcons,
               iconStyle: customizedIconStyle,
+              sliderStyles: customizedSliderTheme,
             ),
             const SizedBox(height: 16),
             _buildButton('Customize Player Icons', customizePlayerIcons),
             _buildButton('Customize icon style', customizeIconStyle),
+            _buildButton('Customize Slider', customizeSlider),
             _buildButton('Reset all', resetAll),
             const SizedBox(height: 16),
             _buildCustomizedPlayer(),
@@ -121,7 +175,6 @@ class _MyAppState extends State<MyApp> {
               backgroundColor: Colors.grey,
               audioPlayer: audioPlayer,
             ),
-            const SizedBox(height: 8),
           ],
         ),
       ),
