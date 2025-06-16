@@ -7,7 +7,8 @@ import '../widgets/audio_image.dart';
 import '../models/audio_info.dart';
 
 class Player extends StatefulWidget {
-  final AudioInfo audioInfo;
+  final AudioInfo? audioInfo;
+  final List<AudioInfo>? audiosList;
   final Map<String, dynamic> iconStyle;
   final Map<PlayerIcons, dynamic> customizedIcons;
   final MethodChannelFlutterAudioPlayerPlugin audioPlayer;
@@ -23,9 +24,10 @@ class Player extends StatefulWidget {
   final double? imageWidth;
   final double? imageHeight;
 
-  const Player({
+  Player({
     super.key,
-    required this.audioInfo,
+    this.audioInfo,
+    this.audiosList,
     this.iconStyle = const {},
     this.customizedIcons = const {},
     required this.audioPlayer,
@@ -40,7 +42,11 @@ class Player extends StatefulWidget {
     this.sliderStyles,
     this.imageWidth,
     this.imageHeight,
-  });
+  }) : assert(
+          (audioInfo != null && audioInfo.audioUrl != null) ||
+              (audiosList != null && audiosList.isNotEmpty),
+          'Either audioInfo or audiosList must be provided',
+        );
 
   @override
   State<Player> createState() => _PlayerState();
@@ -51,6 +57,7 @@ class _PlayerState extends State<Player> {
   int _currentPosition = 0;
   int _totalDuration = 0;
   bool _isDragging = false;
+  int _currentIndex = 0;
   String _status = PlayerStatus.idle.name;
   StreamSubscription? _positionSubscription;
   StreamSubscription? _completionSubscription;
@@ -59,24 +66,21 @@ class _PlayerState extends State<Player> {
   StreamSubscription? _previousTrackSubscription;
   StreamSubscription? _statusSubscription;
 
-  String get audioUrl => widget.audioInfo.audioUrl ?? '';
-  String get audioTitle => widget.audioInfo.title ?? '';
-  String get audioPicture => widget.audioInfo.picture ?? '';
-  String get audioArtist => widget.audioInfo.artist ?? '';
   MethodChannelFlutterAudioPlayerPlugin get _audioPlayer => widget.audioPlayer;
+  AudioInfo get currentAudioInfo =>
+      widget.audioInfo ?? widget.audiosList![_currentIndex];
+  String get audioUrl => currentAudioInfo.audioUrl ?? '';
+  String get audioTitle => currentAudioInfo.title ?? '';
+  String get audioPicture => currentAudioInfo.picture ?? '';
+  String get audioArtist => currentAudioInfo.artist ?? '';
 
   @override
   void initState() {
     super.initState();
-    _setFilePath();
-    _setupListeners();
-    _loadAudio();
-  }
 
-  @override
-  void didUpdateWidget(Player oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.audioInfo.audioUrl != widget.audioInfo.audioUrl) {}
+    _setFilePath(currentAudioInfo.audioUrl!);
+    _loadAudio(currentAudioInfo);
+    _setupListeners();
   }
 
   @override
@@ -100,12 +104,9 @@ class _PlayerState extends State<Player> {
   //   print('Previous track requested from notification');
   // }
 
-  void _setFilePath() async {
-    await _audioPlayer.setFilePath(audioUrl);
-    final totalDuration = await _audioPlayer.getDuration();
-    setState(() {
-      _totalDuration = totalDuration;
-    });
+  Future<void> _setFilePath(String url) async {
+    await _audioPlayer.stop();
+    await _audioPlayer.setFilePath(url);
   }
 
   void _setupListeners() {
@@ -134,24 +135,23 @@ class _PlayerState extends State<Player> {
       widget.onCompletion?.call();
     });
 
+    _audioPlayer.getDuration().then((duration) {
+      setState(() {
+        _totalDuration = duration;
+      });
+    });
+
     _errorSubscription = _audioPlayer.errorStream.listen((error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $error')),
       );
     });
-
-    // _nextTrackSubscription = _audioPlayer.nextTrackStream.listen((_) {
-    //   // Handle next track from notification
-    //   _playNextTrack();
-    // });
-
-    // _previousTrackSubscription = _audioPlayer.previousTrackStream.listen((_) {
-    //   // Handle previous track from notification
-    //   _playPreviousTrack();
-    // });
   }
 
-  Future<void> _loadAudio() async {
+  Future<void> _loadAudio(AudioInfo audioInfo) async {
+    final audioUrl = audioInfo.audioUrl ?? '';
+    final audioTitle = audioInfo.title ?? '';
+    final audioArtist = audioInfo.artist ?? '';
     try {
       if (audioUrl.isEmpty) {
         throw Exception('Audio URL is required');
@@ -186,9 +186,9 @@ class _PlayerState extends State<Player> {
     return positionInSeconds.toDouble();
   }
 
-  void handlePlayAudio() {
+  void handlePlayAudio() async {
     // Handle play audio
-    _audioPlayer.play(audioUrl);
+    await _audioPlayer.play(currentAudioInfo.audioUrl!);
     widget.onPlay?.call();
   }
 
@@ -204,8 +204,11 @@ class _PlayerState extends State<Player> {
   }
 
   void handlePlayPauseAudio() async {
-    if ([PlayerStatus.completed.name, PlayerStatus.ready.name]
-        .contains(_status)) {
+    if ([
+      PlayerStatus.completed.name,
+      PlayerStatus.ready.name,
+      PlayerStatus.idle.name
+    ].contains(_status)) {
       handlePlayAudio();
     } else if (_status == PlayerStatus.playing.name) {
       handlePauseAudio();
@@ -239,15 +242,34 @@ class _PlayerState extends State<Player> {
   }
 
   void handlePlayNextAudio() async {
-    // Handle play next audio
-    // await _audioPlayer.play(audioUrl);
-    // widget.onPlayNext?.call(_currentPosition);
+    if (widget.audiosList == null || widget.audiosList!.isEmpty) return;
+
+    _currentIndex++;
+    if (_currentIndex >= widget.audiosList!.length) {
+      _currentIndex = 0;
+    }
+    final audioInfo = widget.audiosList![_currentIndex];
+    await _setFilePath(audioInfo.audioUrl ?? '');
+    await _loadAudio(audioInfo);
+    _setupListeners();
+
+    await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    widget.onPlayNext?.call();
   }
 
   void handlePlayPreviousAudio() async {
-    // Handle play previous audio
-    // await _audioPlayer.play(audioUrl);
-    // widget.onPlayPrevious?.call(_currentPosition);
+    if (widget.audiosList == null) return;
+
+    _currentIndex--;
+    if (_currentIndex < 0) {
+      _currentIndex = widget.audiosList!.length - 1;
+    }
+    final audioInfo = widget.audiosList![_currentIndex];
+    _setFilePath(audioInfo.audioUrl ?? '');
+    _setupListeners();
+    await _loadAudio(audioInfo);
+    await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    widget.onPlayPrevious?.call();
   }
 
   void onSliderChanged(double value) async {

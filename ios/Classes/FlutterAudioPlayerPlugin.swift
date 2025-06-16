@@ -128,7 +128,7 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
         player?.pause()
         player = nil
         playerItem = nil
-        observePlayerStatus(updatedStatus: "stopped")
+        observePlayerStatus(updatedStatus: "idle")
     }
 
   private func setupRemoteTransportControls() {

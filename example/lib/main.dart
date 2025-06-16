@@ -34,6 +34,40 @@ class _MyAppState extends State<MyApp> {
         'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   );
 
+  final audiosList = [
+    AudioInfo(
+      title: 'Audio Title 1',
+      artist: 'Audio Artist 1',
+      audioUrl:
+          'https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3',
+      picture:
+          'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    ),
+    AudioInfo(
+      title: 'Audio Title 2',
+      artist: 'Audio Artist 2',
+      audioUrl:
+          'https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3',
+      picture:
+          'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    ),
+    AudioInfo(
+      title: 'Audio Title 3',
+      artist: 'Audio Artist 3',
+      audioUrl:
+          'https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3',
+      picture:
+          'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    ),
+    AudioInfo(
+      title: 'Audio Title 4',
+      artist: 'Audio Artist 4',
+      audioUrl:
+          'https://codeskulptor-demos.commondatastorage.googleapis.com/pang/paza-moduless.mp3',
+      picture:
+          'https://images.unsplash.com/photo-1566438480900-0609be27a4be?q=80&w=3094&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    ),
+  ];
   final iconStyles = [
     {
       'color': Colors.green,
@@ -151,10 +185,11 @@ class _MyAppState extends State<MyApp> {
           children: [
             Player(
               audioPlayer: audioPlayer,
-              audioInfo: audioInfo,
+              // audioInfo: audioInfo,
               customizedIcons: customizedPlayerIcons,
               iconStyle: customizedIconStyle,
               sliderStyles: customizedSliderTheme,
+              audiosList: audiosList,
             ),
             const SizedBox(height: 16),
             _buildButton('Customize Player Icons', customizePlayerIcons),
@@ -169,11 +204,12 @@ class _MyAppState extends State<MyApp> {
           mainAxisSize: MainAxisSize.min,
           children: [
             MiniPlayer(
-              audioInfo: audioInfo,
+              // audioInfo: audioInfo,
               iconStyle: customizedIconStyle,
               customizedIcons: customizedPlayerIcons,
               backgroundColor: Colors.grey,
               audioPlayer: audioPlayer,
+              audiosList: audiosList,
             ),
           ],
         ),
