@@ -44,5 +44,38 @@ class FlutterAudioPlayerPlugin {
     return FlutterAudioPlayerPluginPlatform.instance.getDuration();
   }
 
+  Stream<String> get statusStream {
+    return FlutterAudioPlayerPluginPlatform.instance.statusStream;
+  }
+
+  Stream<int> get positionStream {
+    return FlutterAudioPlayerPluginPlatform.instance.positionStream;
+  }
+
+  Stream<void> get completionStream {
+    return FlutterAudioPlayerPluginPlatform.instance.completionStream;
+  }
+
+  Stream<String> get errorStream {
+    return FlutterAudioPlayerPluginPlatform.instance.errorStream;
+  }
+
+  Stream<void> get nextTrackStream {
+    return FlutterAudioPlayerPluginPlatform.instance.nextTrackStream;
+  }
+
+  Stream<void> get previousTrackStream {
+    return FlutterAudioPlayerPluginPlatform.instance.previousTrackStream;
+  }
+
+  Future<void> playNext(int nextIndex) {
+    return FlutterAudioPlayerPluginPlatform.instance.playNext(nextIndex);
+  }
+
+  Future<void> playPrevious(int previousIndex) {
+    return FlutterAudioPlayerPluginPlatform.instance
+        .playPrevious(previousIndex);
+  }
+
   dispose() {}
 }

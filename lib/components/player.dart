@@ -135,6 +135,26 @@ class _PlayerState extends State<Player> {
       widget.onCompletion?.call();
     });
 
+    _nextTrackSubscription =
+        _audioPlayer.nextTrackStream.listen((int nextIndex) {
+      if (widget.audiosList != null && widget.audiosList!.isNotEmpty) {
+        setState(() {
+          _currentIndex = nextIndex;
+        });
+        _audioPlayer.play(widget.audiosList![_currentIndex].audioUrl ?? '');
+      }
+    });
+
+    _previousTrackSubscription =
+        _audioPlayer.previousTrackStream.listen((int previousIndex) {
+      if (widget.audiosList != null && widget.audiosList!.isNotEmpty) {
+        setState(() {
+          _currentIndex = previousIndex;
+        });
+        _audioPlayer.play(widget.audiosList![_currentIndex].audioUrl ?? '');
+      }
+    });
+
     _audioPlayer.getDuration().then((duration) {
       setState(() {
         _totalDuration = duration;
@@ -243,32 +263,26 @@ class _PlayerState extends State<Player> {
 
   void handlePlayNextAudio() async {
     if (widget.audiosList == null || widget.audiosList!.isEmpty) return;
-
-    _currentIndex++;
-    if (_currentIndex >= widget.audiosList!.length) {
-      _currentIndex = 0;
-    }
-    final audioInfo = widget.audiosList![_currentIndex];
+    int nextIndex = (_currentIndex + 1) % widget.audiosList!.length;
+    final audioInfo = widget.audiosList![nextIndex];
     await _setFilePath(audioInfo.audioUrl ?? '');
     await _loadAudio(audioInfo);
     _setupListeners();
 
-    await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    // await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    _audioPlayer.playNext(nextIndex);
     widget.onPlayNext?.call();
   }
 
   void handlePlayPreviousAudio() async {
     if (widget.audiosList == null) return;
-
-    _currentIndex--;
-    if (_currentIndex < 0) {
-      _currentIndex = widget.audiosList!.length - 1;
-    }
-    final audioInfo = widget.audiosList![_currentIndex];
+    int previousIndex = (_currentIndex - 1) % widget.audiosList!.length;
+    final audioInfo = widget.audiosList![previousIndex];
     _setFilePath(audioInfo.audioUrl ?? '');
     _setupListeners();
     await _loadAudio(audioInfo);
-    await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    // await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    _audioPlayer.playPrevious(previousIndex);
     widget.onPlayPrevious?.call();
   }
 

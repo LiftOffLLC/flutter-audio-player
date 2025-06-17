@@ -15,8 +15,8 @@ class MethodChannelFlutterAudioPlayerPlugin
   final _positionController = StreamController<int>.broadcast();
   final _completionController = StreamController<void>.broadcast();
   final _errorController = StreamController<String>.broadcast();
-  final _nextTrackController = StreamController<void>.broadcast();
-  final _previousTrackController = StreamController<void>.broadcast();
+  final _nextTrackController = StreamController<int>.broadcast();
+  final _previousTrackController = StreamController<int>.broadcast();
   final _statusController = StreamController<String>.broadcast();
 
   @override
@@ -29,10 +29,10 @@ class MethodChannelFlutterAudioPlayerPlugin
   Stream<String> get errorStream => _errorController.stream;
 
   @override
-  Stream<void> get nextTrackStream => _nextTrackController.stream;
+  Stream<int> get nextTrackStream => _nextTrackController.stream;
 
   @override
-  Stream<void> get previousTrackStream => _previousTrackController.stream;
+  Stream<int> get previousTrackStream => _previousTrackController.stream;
 
   @override
   Stream<String> get statusStream => _statusController.stream;
@@ -52,14 +52,20 @@ class MethodChannelFlutterAudioPlayerPlugin
       case 'onError':
         _errorController.add(call.arguments as String);
         break;
-      case 'onNextTrack':
-        _nextTrackController.add(null);
-        break;
-      case 'onPreviousTrack':
-        _previousTrackController.add(null);
-        break;
+      // case 'onNextTrack':
+      //   _nextTrackController.add(null);
+      //   break;
+      // case 'onPreviousTrack':
+      //   _previousTrackController.add(null);
+      //   break;
       case 'onStatusChanged':
         _statusController.add(call.arguments as String);
+        break;
+      case 'onPlayNext':
+        _nextTrackController.add(call.arguments as int);
+        break;
+      case 'onPlayPrevious':
+        _previousTrackController.add(call.arguments as int);
         break;
       default:
         throw MissingPluginException('Not implemented: ${call.method}');
@@ -126,6 +132,17 @@ class MethodChannelFlutterAudioPlayerPlugin
   Future<int> getDuration() async {
     final duration = await methodChannel.invokeMethod('getDuration');
     return duration as int;
+  }
+
+  @override
+  Future<void> playNext(int nextIndex) async {
+    await methodChannel.invokeMethod('playNext', {'nextIndex': nextIndex});
+  }
+
+  @override
+  Future<void> playPrevious(int previousIndex) async {
+    await methodChannel
+        .invokeMethod('playPrevious', {'previousIndex': previousIndex});
   }
 
   // // Don't forget to dispose your controllers!

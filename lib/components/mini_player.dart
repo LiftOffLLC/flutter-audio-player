@@ -60,6 +60,8 @@ class _MiniPlayerState extends State<MiniPlayer> {
   StreamSubscription? _completionSubscription;
   StreamSubscription? _errorSubscription;
   StreamSubscription? _statusSubscription;
+  StreamSubscription? _nextTrackSubscription;
+  StreamSubscription? _previousTrackSubscription;
   AudioInfo get currentAudioInfo =>
       widget.audioInfo ?? widget.audiosList![_currentIndex];
   String get audioPicture => currentAudioInfo.picture ?? '';
@@ -82,6 +84,8 @@ class _MiniPlayerState extends State<MiniPlayer> {
     _completionSubscription?.cancel();
     _errorSubscription?.cancel();
     _statusSubscription?.cancel();
+    _nextTrackSubscription?.cancel();
+    _previousTrackSubscription?.cancel();
     super.dispose();
   }
 
@@ -134,15 +138,29 @@ class _MiniPlayerState extends State<MiniPlayer> {
       );
     });
 
-    // _nextTrackSubscription = _audioPlayer.nextTrackStream.listen((_) {
-    //   // Handle next track from notification
-    //   _playNextTrack();
-    // });
+    _nextTrackSubscription =
+        _audioPlayer.nextTrackStream.listen((int nextIndex) {
+      if (widget.audiosList != null && widget.audiosList!.isNotEmpty) {
+        setState(() {
+          _currentIndex = nextIndex;
+        });
+        if (_isPlaying) {
+          _audioPlayer.play(widget.audiosList![_currentIndex].audioUrl ?? '');
+        }
+      }
+    });
 
-    // _previousTrackSubscription = _audioPlayer.previousTrackStream.listen((_) {
-    //   // Handle previous track from notification
-    //   _playPreviousTrack();
-    // });
+    _previousTrackSubscription =
+        _audioPlayer.previousTrackStream.listen((int previousIndex) {
+      if (widget.audiosList != null && widget.audiosList!.isNotEmpty) {
+        setState(() {
+          _currentIndex = previousIndex;
+        });
+        if (_isPlaying) {
+          _audioPlayer.play(widget.audiosList![_currentIndex].audioUrl ?? '');
+        }
+      }
+    });
   }
 
   Future<void> _setFilePath(String url) async {
@@ -184,31 +202,26 @@ class _MiniPlayerState extends State<MiniPlayer> {
   void handlePlayNextAudio() async {
     if (widget.audiosList == null || widget.audiosList!.isEmpty) return;
 
-    _currentIndex++;
-    if (_currentIndex >= widget.audiosList!.length) {
-      _currentIndex = 0;
-    }
-    final audioInfo = widget.audiosList![_currentIndex];
+    int nextIndex = (_currentIndex + 1) % widget.audiosList!.length;
+    final audioInfo = widget.audiosList![nextIndex];
     await _setFilePath(audioInfo.audioUrl ?? '');
     await _loadAudio(audioInfo);
     _setupListeners();
 
-    await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    _audioPlayer.playNext(nextIndex);
     widget.onPlayNext?.call();
   }
 
   void handlePlayPreviousAudio() async {
     if (widget.audiosList == null) return;
 
-    _currentIndex--;
-    if (_currentIndex < 0) {
-      _currentIndex = widget.audiosList!.length - 1;
-    }
-    final audioInfo = widget.audiosList![_currentIndex];
-    _setFilePath(audioInfo.audioUrl ?? '');
-    _setupListeners();
+    int previousIndex = (_currentIndex - 1) % widget.audiosList!.length;
+    final audioInfo = widget.audiosList![previousIndex];
+    await _setFilePath(audioInfo.audioUrl ?? '');
     await _loadAudio(audioInfo);
-    await _audioPlayer.play(audioInfo.audioUrl ?? '');
+    _setupListeners();
+
+    _audioPlayer.playPrevious(previousIndex);
     widget.onPlayPrevious?.call();
   }
 

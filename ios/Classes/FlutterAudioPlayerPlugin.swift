@@ -110,6 +110,23 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
         
     case "getDuration":
         getDuration(result: result)
+
+    case "playNext":
+        guard let args = call.arguments as? [String: Any],
+              let nextIndex = args["nextIndex"] as? Int else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+            return
+        }
+        playNext(nextIndex: nextIndex, result: result)
+
+    case "playPrevious":
+        guard let args = call.arguments as? [String: Any],
+              let previousIndex = args["previousIndex"] as? Int else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+            return
+        }
+        playPrevious(previousIndex: previousIndex, result: result)
+
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -323,7 +340,17 @@ public class FlutterAudioPlayerPlugin: NSObject, FlutterPlugin {
       let duration = CMTimeGetSeconds(player.currentItem?.asset.duration ?? CMTime.zero)
       result(Int(duration * 1000)) // Convert to milliseconds
   }
-  
+
+  private func playNext(nextIndex: Int, result: @escaping FlutterResult) {
+    self.channel?.invokeMethod("onPlayNext", arguments: nextIndex)
+    result(nil)
+  }
+
+  private func playPrevious(previousIndex: Int, result: @escaping FlutterResult) {
+    self.channel?.invokeMethod("onPlayPrevious", arguments: previousIndex)
+    result(nil)
+  }
+
   private func startPositionTimer() {
       guard let player = player else { return }
       stopPositionTimer()

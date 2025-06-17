@@ -94,6 +94,14 @@ abstract class FlutterAudioPlayerPluginPlatform extends PlatformInterface {
     throw UnimplementedError('getDuration() has not been implemented.');
   }
 
+  Future<void> playNext(int nextIndex) {
+    throw UnimplementedError('playNext() has not been implemented.');
+  }
+
+  Future<void> playPrevious(int previousIndex) {
+    throw UnimplementedError('playPrevious() has not been implemented.');
+  }
+
   dispose() {
     throw UnimplementedError('dispose() has not been implemented.');
   }
