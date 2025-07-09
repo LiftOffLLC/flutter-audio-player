@@ -1,11 +1,11 @@
 name: flutter_audio_player_plugin
-description: "A new Flutter plugin project."
+description: "A new Flutter Audio Player Plugin."
 
 version: 1.0.0+1
 
-homepage: https://github.com/yourusername/your_package_name
+homepage: https://github.com/LiftOffLLC/flutter-audio-player
 
-repository: https://github.com/yourusername/your_package_name
+repository: https://github.com/LiftOffLLC/flutter-audio-player
 
 environment:
   sdk: ^3.5.4
