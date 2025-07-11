@@ -346,10 +346,10 @@ class _PlayerState extends State<Player> {
             activeTrackColor:
                 widget.sliderStyles?.activeTrackColor ?? Colors.indigo,
             inactiveTrackColor: widget.sliderStyles?.inactiveTrackColor ??
-                Colors.indigo.withOpacity(0.2),
+                Colors.indigo.withAlpha(20),
             thumbColor: widget.sliderStyles?.thumbColor ?? Colors.indigo,
             overlayColor: widget.sliderStyles?.overlayColor ??
-                Colors.indigo.withOpacity(0.2),
+                Colors.indigo.withAlpha(20),
           ),
           child: Slider(
             value: getCurrentPosition(),

@@ -6,6 +6,7 @@ version: 1.0.0+1
 homepage: https://github.com/LiftOffLLC/flutter-audio-player
 
 repository: https://github.com/LiftOffLLC/flutter-audio-player
+publisher: liftoffllc.com
 
 environment:
   sdk: ^3.5.4
@@ -20,6 +21,11 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+
+topics:
+  - audio
+  - audio-player
+  - flutter-audio-player
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
